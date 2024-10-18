@@ -15,12 +15,17 @@ import {
   UIManager,
   Animated,
 } from "react-native";
+import axios, { AxiosError } from "axios";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { checkEmail, registerUser } from "../functions/api";
+import { checkEmail, registerUser, loginUser } from "../functions/api";
+import { setToken } from "../functions/storage";
 
 // Enable LayoutAnimation on Android
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -33,6 +38,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [invalidEmail, setInvalidEmail] = useState(false);
+  const [invalidPassword, setInvalidPassword] = useState(false);
 
   const shakeAnim = useRef(new Animated.Value(0)).current; // Animated value for shake effect
   let isAnimating = false; // Flag to prevent overlapping animations
@@ -42,13 +48,41 @@ export default function Auth() {
     if (!isAnimating) {
       isAnimating = true;
       Animated.sequence([
-        Animated.timing(shakeAnim, { toValue: 8, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -8, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 6, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -6, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 4, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -4, duration: 75, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 0, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, {
+          toValue: 8,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -8,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: 6,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -6,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: 4,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -4,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: 0,
+          duration: 75,
+          useNativeDriver: true,
+        }),
       ]).start(() => {
         isAnimating = false; // Reset flag when animation is complete
       });
@@ -70,8 +104,14 @@ export default function Auth() {
       }
     };
 
-    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", handleKeyboardShow);
-    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", handleKeyboardHide);
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      handleKeyboardShow
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      handleKeyboardHide
+    );
 
     return () => {
       keyboardDidShowListener.remove();
@@ -107,13 +147,43 @@ export default function Auth() {
     if (isExistingUser) {
       setLoading(true);
       console.log("Sign in with:", emailOrPhone, password);
-      setLoading(false);
+
+      try {
+        const result = await loginUser(emailOrPhone, password);
+        console.log(result);
+        setInvalidPassword(false); // Clear invalid password state on success
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // Check if it's an AxiosError and has the response property
+          if (error.response?.status === 400) {
+            setInvalidPassword(true); // Set invalid password state
+            triggerShake(); // Trigger shake animation for incorrect password
+          }
+        } else {
+          console.error("Unknown error occurred:", error);
+        }
+      } finally {
+        setLoading(false);
+      }
     } else if (signUp) {
       setLoading(true);
       console.log("Sign up with:", emailOrPhone, password);
-      const result = await registerUser(emailOrPhone, password);
-      console.log(result);
-      setLoading(false);
+
+      try {
+        const result = await registerUser(emailOrPhone, password);
+        console.log(result);
+        setInvalidPassword(false); // Clear invalid password state on success
+      } catch (error: unknown) {
+        console.error("Error registering user:", error);
+
+        if (axios.isAxiosError(error)) {
+          // Handle Axios error for sign up if needed
+        } else {
+          console.error("Unknown error occurred:", error);
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -136,7 +206,12 @@ export default function Auth() {
           ]}
         >
           {/* Logo area */}
-          <View style={[styles.logoContainer, keyboardVisible && styles.logoContainerSmall]}>
+          <View
+            style={[
+              styles.logoContainer,
+              keyboardVisible && styles.logoContainerSmall,
+            ]}
+          >
             <FontAwesome name="sign-in" size={75} color="#141414" />
           </View>
 
@@ -160,13 +235,24 @@ export default function Auth() {
               selectionColor="#141414"
             />
             {isExistingUser !== null && (
-              <FontAwesome5 name="check-circle" size={24} color="green" style={styles.checkmark} />
+              <FontAwesome5
+                name="check-circle"
+                size={24}
+                color="green"
+                style={styles.checkmark}
+              />
             )}
           </Animated.View>
 
           {/* Password input */}
           {(isExistingUser !== null || signUp) && (
-            <View style={styles.passwordContainer}>
+            <Animated.View
+              style={[
+                styles.passwordContainer,
+                invalidPassword && { borderColor: "red", borderWidth: 2 }, // Show red border for invalid password
+                { transform: [{ translateX: shakeAnim }] }, // Apply shake effect
+              ]}
+            >
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Enter your password"
@@ -180,19 +266,27 @@ export default function Auth() {
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.showPasswordButton}
               >
-                <Text style={styles.showPasswordText}>{showPassword ? "Hide" : "Show"}</Text>
+                <Text style={styles.showPasswordText}>
+                  {showPassword ? "Hide" : "Show"}
+                </Text>
               </TouchableOpacity>
-            </View>
+            </Animated.View>
           )}
 
           {loading && <ActivityIndicator size="large" color="#000" />}
 
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={isExistingUser === null ? checkEmailExists : handleLoginOrSignUp}
+            onPress={
+              isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
+            }
           >
             <Text style={styles.loginButtonText}>
-              {isExistingUser === null ? "Next" : isExistingUser ? "Sign In" : "Sign Up"}
+              {isExistingUser === null
+                ? "Next"
+                : isExistingUser
+                ? "Sign In"
+                : "Sign Up"}
             </Text>
           </TouchableOpacity>
 
@@ -209,8 +303,6 @@ export default function Auth() {
     </KeyboardAvoidingView>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {

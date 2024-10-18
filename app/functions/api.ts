@@ -3,7 +3,12 @@ import axios, { AxiosResponse } from 'axios';
 const API_BASE_URL = 'http://192.168.86.20:8000/api/v1';
 
 interface RegisterResponse {
-  message: string;
+  message?: string;
+}
+interface LoginResponse {
+  access_token?: string;
+  token_type?: string;
+  detail?: string;
 }
 
 export const checkEmail = async (email: string): Promise<boolean> => {
@@ -34,4 +39,16 @@ export const registerUser = async (email: string, password: string): Promise<Reg
   }
 };
   
-
+export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
+  try {
+    const response: AxiosResponse<LoginResponse> = await axios.post(`${API_BASE_URL}/token`, {
+      email,
+      password
+    });
+    return response.data; // Should contain the access_token and token_type
+  } catch (error) {
+    // console.error("Error logging in user:", error);
+    console.log("Error logging in user:", error)
+    throw error;
+  }
+};
