@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -8,7 +8,9 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
-  StatusBar, // Import StatusBar
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { checkEmail, registerUser } from "../functions/api";
@@ -20,11 +22,33 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [signUp, setSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [keyboardVisible, setKeyboardVisible] = useState(false); // State to track keyboard visibility
+
+  useEffect(() => {
+    // Add keyboard event listeners
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+
+    // Clean up event listeners on unmount
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const checkEmailExists = async () => {
     setLoading(true);
     try {
       const emailResponse = await checkEmail(emailOrPhone);
+      console.log(
+        emailResponse ? "Email exists - sign in" : "Email doesn't exist - sign up"
+      );
       setIsExistingUser(emailResponse);
       setSignUp(!emailResponse);
     } catch (error) {
@@ -47,106 +71,116 @@ export default function Auth() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        {/* Uber-like logo area */}
-        <View style={styles.logoContainer}>
-          <FontAwesome5 name="home" size={75} color="#141414" />
-        </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior based on platform
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[styles.innerContainer, { paddingTop: keyboardVisible ? 120 : (StatusBar.currentHeight ? StatusBar.currentHeight + 170 : 190) }]}        >
+          {/* Uber-like logo area */}
+          <View style={[styles.logoContainer, keyboardVisible && styles.logoContainerSmall]}>
+            <FontAwesome5 name="home" size={75} color="#141414" />
+          </View>
 
-        {/* Input for email */}
-        <View style={styles.emailContainer}>
-          <TouchableOpacity style={{ flex: 1 }} onPress={() => {}}>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={emailOrPhone}
-              onChangeText={setEmailOrPhone}
-              keyboardType="email-address"
-              placeholderTextColor="#A9A9A9"
-              autoCapitalize="none"
-              editable={isExistingUser === null}
-              selectionColor="#141414"
-            />
-          </TouchableOpacity>
-          {isExistingUser !== null && (
-            <FontAwesome5
-              name="check-circle"
-              size={24}
-              color="green"
-              style={styles.checkmark}
-            />
-          )}
-        </View>
-
-        {/* Password input */}
-        {(isExistingUser !== null || signUp) && (
-          <View style={styles.passwordContainer}>
+          {/* Input for email */}
+          <View style={styles.emailContainer}>
             <TouchableOpacity style={{ flex: 1 }} onPress={() => {}}>
               <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
+                style={styles.input}
+                placeholder="Enter your email"
+                value={emailOrPhone}
+                onChangeText={setEmailOrPhone}
+                keyboardType="email-address"
                 placeholderTextColor="#A9A9A9"
+                autoCapitalize="none"
+                editable={isExistingUser === null}
                 selectionColor="#141414"
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.showPasswordButton}
-            >
-              <Text style={styles.showPasswordText}>
-                {showPassword ? "Hide" : "Show"}
-              </Text>
-            </TouchableOpacity>
+            {isExistingUser !== null && (
+              <FontAwesome5
+                name="check-circle"
+                size={24}
+                color="green"
+                style={styles.checkmark}
+              />
+            )}
           </View>
-        )}
 
-        {/* Show a loader while checking email */}
-        {loading && <ActivityIndicator size="large" color="#000" />}
+          {/* Password input */}
+          {(isExistingUser !== null || signUp) && (
+            <View style={styles.passwordContainer}>
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => {}}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor="#A9A9A9"
+                  selectionColor="#141414"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.showPasswordButton}
+              >
+                <Text style={styles.showPasswordText}>
+                  {showPassword ? "Hide" : "Show"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-        {/* Login/Sign-Up button */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={
-            isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
-          }
-        >
-          <Text style={styles.loginButtonText}>
-            {isExistingUser === null
-              ? "Next"
-              : isExistingUser
-              ? "Sign In"
-              : "Sign Up"}
-          </Text>
-        </TouchableOpacity>
+          {/* Show a loader while checking email */}
+          {loading && <ActivityIndicator size="large" color="#000" />}
 
-        {/* Terms and conditions */}
-        <View style={styles.footerTextContainer}>
-          <Text style={styles.footerText}>
-            By continuing, you agree to our{" "}
-            <Text style={styles.linkText}>Terms of Service</Text> and{" "}
-            <Text style={styles.linkText}>Privacy Policy</Text>.
-          </Text>
+          {/* Login/Sign-Up button */}
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={
+              isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
+            }
+          >
+            <Text style={styles.loginButtonText}>
+              {isExistingUser === null
+                ? "Next"
+                : isExistingUser
+                ? "Sign In"
+                : "Sign Up"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Terms and conditions */}
+          <View style={styles.footerTextContainer}>
+            <Text style={styles.footerText}>
+              By continuing, you agree to our{" "}
+              <Text style={styles.linkText}>Terms of Service</Text> and{" "}
+              <Text style={styles.linkText}>Privacy Policy</Text>.
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start", // Align contents to the top
-    paddingHorizontal: 24,
-    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 130 : 150, // Add some padding to avoid overlap with the StatusBar
     backgroundColor: "#fff",
+  },
+  innerContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
+    paddingHorizontal: 24,
   },
   logoContainer: {
     alignItems: "center",
     marginBottom: 40,
+  },
+  logoContainerSmall: {
+    marginBottom: 20,
   },
   emailContainer: {
     flexDirection: "row",
