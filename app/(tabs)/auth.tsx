@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -13,8 +13,10 @@ import {
   Platform,
   LayoutAnimation,
   UIManager,
+  Animated,
 } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { checkEmail, registerUser } from "../functions/api";
 
 // Enable LayoutAnimation on Android
@@ -30,18 +32,40 @@ export default function Auth() {
   const [signUp, setSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [invalidEmail, setInvalidEmail] = useState(false);
+
+  const shakeAnim = useRef(new Animated.Value(0)).current; // Animated value for shake effect
+  let isAnimating = false; // Flag to prevent overlapping animations
+
+  // Function to trigger shake animation
+  const triggerShake = () => {
+    if (!isAnimating) {
+      isAnimating = true;
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 8, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 6, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -6, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 4, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -4, duration: 75, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 75, useNativeDriver: true }),
+      ]).start(() => {
+        isAnimating = false; // Reset flag when animation is complete
+      });
+    }
+  };
 
   useEffect(() => {
     const handleKeyboardShow = () => {
       if (!keyboardVisible) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Trigger layout animation
         setKeyboardVisible(true);
       }
     };
 
     const handleKeyboardHide = () => {
       if (keyboardVisible) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Trigger layout animation
         setKeyboardVisible(false);
       }
     };
@@ -55,7 +79,18 @@ export default function Auth() {
     };
   }, [keyboardVisible]);
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const checkEmailExists = async () => {
+    if (!validateEmail(emailOrPhone)) {
+      setInvalidEmail(true);
+      triggerShake(); // Trigger the shake animation for invalid email input
+      return;
+    }
+    setInvalidEmail(false);
     setLoading(true);
     try {
       const emailResponse = await checkEmail(emailOrPhone);
@@ -63,23 +98,22 @@ export default function Auth() {
       setSignUp(!emailResponse);
     } catch (error) {
       console.error("Error checking email:", error);
-    } 
-    finally {
+    } finally {
       setLoading(false);
     }
   };
 
   const handleLoginOrSignUp = async () => {
     if (isExistingUser) {
-      setLoading(true)
+      setLoading(true);
       console.log("Sign in with:", emailOrPhone, password);
-      setLoading(false)
+      setLoading(false);
     } else if (signUp) {
-      setLoading(true)
+      setLoading(true);
       console.log("Sign up with:", emailOrPhone, password);
       const result = await registerUser(emailOrPhone, password);
       console.log(result);
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -103,16 +137,22 @@ export default function Auth() {
         >
           {/* Logo area */}
           <View style={[styles.logoContainer, keyboardVisible && styles.logoContainerSmall]}>
-            <FontAwesome5 name="home" size={75} color="#141414" />
+            <FontAwesome name="sign-in" size={75} color="#141414" />
           </View>
 
           {/* Input for email */}
-          <View style={styles.emailContainer}>
+          <Animated.View
+            style={[
+              styles.emailContainer,
+              invalidEmail && { borderColor: "red", borderWidth: 2 },
+              { transform: [{ translateX: shakeAnim }] }, // Apply shaking effect
+            ]}
+          >
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
               value={emailOrPhone}
-              onChangeText={setEmailOrPhone}
+              onChangeText={(text) => setEmailOrPhone(text)}
               keyboardType="email-address"
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
@@ -122,7 +162,7 @@ export default function Auth() {
             {isExistingUser !== null && (
               <FontAwesome5 name="check-circle" size={24} color="green" style={styles.checkmark} />
             )}
-          </View>
+          </Animated.View>
 
           {/* Password input */}
           {(isExistingUser !== null || signUp) && (
@@ -169,6 +209,8 @@ export default function Auth() {
     </KeyboardAvoidingView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
