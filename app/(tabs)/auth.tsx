@@ -10,10 +10,17 @@ import {
   ActivityIndicator,
   StatusBar,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { checkEmail, registerUser } from "../functions/api";
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function Auth() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -21,133 +28,131 @@ export default function Auth() {
   const [isExistingUser, setIsExistingUser] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [signUp, setSignUp] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const [keyboardVisible, setKeyboardVisible] = useState(false); // State to track keyboard visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    // Add keyboard event listeners
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => setKeyboardVisible(true)
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => setKeyboardVisible(false)
-    );
+    const handleKeyboardShow = () => {
+      if (!keyboardVisible) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setKeyboardVisible(true);
+      }
+    };
 
-    // Clean up event listeners on unmount
+    const handleKeyboardHide = () => {
+      if (keyboardVisible) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setKeyboardVisible(false);
+      }
+    };
+
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", handleKeyboardShow);
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", handleKeyboardHide);
+
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
     };
-  }, []);
+  }, [keyboardVisible]);
 
   const checkEmailExists = async () => {
     setLoading(true);
     try {
       const emailResponse = await checkEmail(emailOrPhone);
-      console.log(
-        emailResponse ? "Email exists - sign in" : "Email doesn't exist - sign up"
-      );
       setIsExistingUser(emailResponse);
       setSignUp(!emailResponse);
     } catch (error) {
       console.error("Error checking email:", error);
-    } finally {
+    } 
+    finally {
       setLoading(false);
     }
   };
 
   const handleLoginOrSignUp = async () => {
     if (isExistingUser) {
-      // Handle sign-in flow
+      setLoading(true)
       console.log("Sign in with:", emailOrPhone, password);
+      setLoading(false)
     } else if (signUp) {
-      // Handle sign-up flow
+      setLoading(true)
       console.log("Sign up with:", emailOrPhone, password);
       const result = await registerUser(emailOrPhone, password);
       console.log(result);
+      setLoading(false)
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior based on platform
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[styles.innerContainer, { paddingTop: keyboardVisible ? 120 : (StatusBar.currentHeight ? StatusBar.currentHeight + 170 : 190) }]}        >
-          {/* Uber-like logo area */}
+        <View
+          style={[
+            styles.innerContainer,
+            {
+              paddingTop: keyboardVisible
+                ? 120
+                : StatusBar.currentHeight
+                ? StatusBar.currentHeight + 170
+                : 190,
+            },
+          ]}
+        >
+          {/* Logo area */}
           <View style={[styles.logoContainer, keyboardVisible && styles.logoContainerSmall]}>
             <FontAwesome5 name="home" size={75} color="#141414" />
           </View>
 
           {/* Input for email */}
           <View style={styles.emailContainer}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => {}}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your email"
-                value={emailOrPhone}
-                onChangeText={setEmailOrPhone}
-                keyboardType="email-address"
-                placeholderTextColor="#A9A9A9"
-                autoCapitalize="none"
-                editable={isExistingUser === null}
-                selectionColor="#141414"
-              />
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              value={emailOrPhone}
+              onChangeText={setEmailOrPhone}
+              keyboardType="email-address"
+              placeholderTextColor="#A9A9A9"
+              autoCapitalize="none"
+              editable={isExistingUser === null}
+              selectionColor="#141414"
+            />
             {isExistingUser !== null && (
-              <FontAwesome5
-                name="check-circle"
-                size={24}
-                color="green"
-                style={styles.checkmark}
-              />
+              <FontAwesome5 name="check-circle" size={24} color="green" style={styles.checkmark} />
             )}
           </View>
 
           {/* Password input */}
           {(isExistingUser !== null || signUp) && (
             <View style={styles.passwordContainer}>
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => {}}>
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  placeholderTextColor="#A9A9A9"
-                  selectionColor="#141414"
-                />
-              </TouchableOpacity>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholderTextColor="#A9A9A9"
+                selectionColor="#141414"
+              />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.showPasswordButton}
               >
-                <Text style={styles.showPasswordText}>
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
+                <Text style={styles.showPasswordText}>{showPassword ? "Hide" : "Show"}</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* Show a loader while checking email */}
           {loading && <ActivityIndicator size="large" color="#000" />}
 
-          {/* Login/Sign-Up button */}
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={
-              isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
-            }
+            onPress={isExistingUser === null ? checkEmailExists : handleLoginOrSignUp}
           >
             <Text style={styles.loginButtonText}>
-              {isExistingUser === null
-                ? "Next"
-                : isExistingUser
-                ? "Sign In"
-                : "Sign Up"}
+              {isExistingUser === null ? "Next" : isExistingUser ? "Sign In" : "Sign Up"}
             </Text>
           </TouchableOpacity>
 

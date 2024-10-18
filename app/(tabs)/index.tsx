@@ -1,64 +1,90 @@
-import React from 'react';
-import { ImageBackground, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export default function HomeScreen() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
+  const logoScale = useRef(new Animated.Value(0)).current;
+  const buttonScale = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Animation sequence for logo and button
+    Animated.sequence([
+      Animated.spring(logoScale, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+      Animated.spring(buttonScale, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [logoScale, buttonScale]);
 
   const handleGetStartedPress = () => {
-    navigation.navigate('auth' as unknown as never);
+    navigation.navigate("auth" as unknown as never);
   };
 
   return (
-    <ImageBackground
-      source={require('@/assets/images/welcome.png')} // Your background image here
-      style={styles.background}
-    >
-      <View style={styles.container}>
-        <Text style={styles.logoText}>FFixer</Text>
+    <View style={styles.container}>
+      <Animated.Text
+        style={[styles.logoText, { transform: [{ scale: logoScale }] }]}
+      >
+        FFixer
+      </Animated.Text>
 
-        <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStartedPress}>
+      <TouchableOpacity onPress={handleGetStartedPress} style={styles.buttonContainer}>
+        <Animated.View
+          style={[
+            styles.getStartedButton,
+            { transform: [{ scale: buttonScale }] },
+          ]}
+        >
           <Text style={styles.getStartedText}>Get Started</Text>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+        </Animated.View>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
-    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF", // Set a clean background color
     padding: 20,
-    justifyContent: 'space-between', // Distribute content between top and bottom
   },
   logoText: {
     fontSize: 48,
-    fontFamily: 'helvetica_bold',
-    color: '#141414',
-    marginTop: 100, // Adjust to move the text further down if needed
-
+    fontFamily: "helvetica_bold",
+    color: "#141414",
+    marginBottom: 500,
+  },
+  buttonContainer: {
+    width: "100%"
   },
   getStartedButton: {
-    alignSelf: 'center', // Center the button horizontally
-    width: '90%',
+    alignSelf: "center",
+    width: "90%",
     height: 60,
-    padding: 15,
-    backgroundColor: '#141414',
+    backgroundColor: "#141414",
     borderRadius: 30,
-    alignItems: 'center',
-    marginBottom: 75,
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
   getStartedText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'helvetica',
+    fontWeight: "bold",
+    fontFamily: "helvetica",
   },
 });
