@@ -1,37 +1,44 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { Stack } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function TabLayout() {
+export default function MainLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+        headerShown: false, // Hide the header globally
+        contentStyle: {
+          backgroundColor: Colors[colorScheme ?? 'light'].background, // Set the background color based on theme
+        },
+      }}
+    >
+      {/* Main screen for your app */}
+      <Stack.Screen name="index" />
+      <Stack.Screen
+        name="auth"
+        options={({ navigation }) => ({
+          headerShown: true,
+          title: "",
+          headerStyle: {
+            backgroundColor: "#fff",
+          },
+          headerTintColor: "#000",
+          headerBackTitleVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ paddingLeft: 10 }} // Adjust the padding here
+            >
+              <Ionicons name="arrow-back" size={28} color="#141414" />
+            </TouchableOpacity>
           ),
-        }}
+        })}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    </Stack>
   );
 }
