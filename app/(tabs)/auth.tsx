@@ -40,51 +40,51 @@ export default function Auth() {
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidPassword, setInvalidPassword] = useState(false);
 
-  const shakeAnim = useRef(new Animated.Value(0)).current; // Animated value for shake effect
-  let isAnimating = false; // Flag to prevent overlapping animations
+  const passwordShakeAnim = useRef(new Animated.Value(0)).current; // Animated value for password shake
+  let isPasswordAnimating = false; // Prevent overlapping animations
 
-  // Function to trigger shake animation
-  const triggerShake = () => {
-    if (!isAnimating) {
-      isAnimating = true;
+  // Function to trigger password shake animation
+  const triggerPasswordShake = () => {
+    if (!isPasswordAnimating) {
+      isPasswordAnimating = true;
       Animated.sequence([
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: 8,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: -8,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: 6,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: -6,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: 4,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: -4,
           duration: 75,
           useNativeDriver: true,
         }),
-        Animated.timing(shakeAnim, {
+        Animated.timing(passwordShakeAnim, {
           toValue: 0,
           duration: 75,
           useNativeDriver: true,
         }),
       ]).start(() => {
-        isAnimating = false; // Reset flag when animation is complete
+        isPasswordAnimating = false; // Reset flag when animation is complete
       });
     }
   };
@@ -127,7 +127,6 @@ export default function Auth() {
   const checkEmailExists = async () => {
     if (!validateEmail(emailOrPhone)) {
       setInvalidEmail(true);
-      triggerShake(); // Trigger the shake animation for invalid email input
       return;
     }
     setInvalidEmail(false);
@@ -154,10 +153,9 @@ export default function Auth() {
         setInvalidPassword(false); // Clear invalid password state on success
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          // Check if it's an AxiosError and has the response property
           if (error.response?.status === 400) {
             setInvalidPassword(true); // Set invalid password state
-            triggerShake(); // Trigger shake animation for incorrect password
+            triggerPasswordShake(); // Trigger shake animation for incorrect password
           }
         } else {
           console.error("Unknown error occurred:", error);
@@ -175,12 +173,6 @@ export default function Auth() {
         setInvalidPassword(false); // Clear invalid password state on success
       } catch (error: unknown) {
         console.error("Error registering user:", error);
-
-        if (axios.isAxiosError(error)) {
-          // Handle Axios error for sign up if needed
-        } else {
-          console.error("Unknown error occurred:", error);
-        }
       } finally {
         setLoading(false);
       }
@@ -205,7 +197,6 @@ export default function Auth() {
             },
           ]}
         >
-          {/* Logo area */}
           <View
             style={[
               styles.logoContainer,
@@ -216,11 +207,10 @@ export default function Auth() {
           </View>
 
           {/* Input for email */}
-          <Animated.View
+          <View
             style={[
               styles.emailContainer,
               invalidEmail && { borderColor: "red", borderWidth: 2 },
-              { transform: [{ translateX: shakeAnim }] }, // Apply shaking effect
             ]}
           >
             <TextInput
@@ -242,15 +232,15 @@ export default function Auth() {
                 style={styles.checkmark}
               />
             )}
-          </Animated.View>
+          </View>
 
           {/* Password input */}
           {(isExistingUser !== null || signUp) && (
             <Animated.View
               style={[
                 styles.passwordContainer,
-                invalidPassword && { borderColor: "red", borderWidth: 2 }, // Show red border for invalid password
-                { transform: [{ translateX: shakeAnim }] }, // Apply shake effect
+                invalidPassword && { borderColor: "red", borderWidth: 2 },
+                { transform: [{ translateX: passwordShakeAnim }] }, // Apply password shaking effect
               ]}
             >
               <TextInput
@@ -290,7 +280,6 @@ export default function Auth() {
             </Text>
           </TouchableOpacity>
 
-          {/* Terms and conditions */}
           <View style={styles.footerTextContainer}>
             <Text style={styles.footerText}>
               By continuing, you agree to our{" "}
