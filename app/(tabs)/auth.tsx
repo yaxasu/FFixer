@@ -40,6 +40,55 @@ export default function Auth() {
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidPassword, setInvalidPassword] = useState(false);
 
+  const emailShakeAnim = useRef(new Animated.Value(0)).current;
+  const isEmailAnimatingRef = useRef(false); // Ref to preserve state between renders
+
+  // Function to trigger email shake animation
+  const triggerEmailShake = () => {
+    if (!isEmailAnimatingRef.current) {
+      isEmailAnimatingRef.current = true; // Use the ref instead of a regular variable
+      Animated.sequence([
+        Animated.timing(emailShakeAnim, {
+          toValue: 8,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: -8,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: 6,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: -6,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: 4,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: -4,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emailShakeAnim, {
+          toValue: 0,
+          duration: 75,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        isEmailAnimatingRef.current = false; // Reset flag after animation completes
+      });
+    }
+  };
+
   const passwordShakeAnim = useRef(new Animated.Value(0)).current; // Animated value for password shake
   let isPasswordAnimating = false; // Prevent overlapping animations
 
@@ -127,6 +176,7 @@ export default function Auth() {
   const checkEmailExists = async () => {
     if (!validateEmail(emailOrPhone)) {
       setInvalidEmail(true);
+      triggerEmailShake()
       return;
     }
     setInvalidEmail(false);
@@ -207,10 +257,11 @@ export default function Auth() {
           </View>
 
           {/* Input for email */}
-          <View
+          <Animated.View
             style={[
               styles.emailContainer,
               invalidEmail && { borderColor: "red", borderWidth: 2 },
+              { transform: [{ translateX: emailShakeAnim }] },
             ]}
           >
             <TextInput
@@ -232,7 +283,7 @@ export default function Auth() {
                 style={styles.checkmark}
               />
             )}
-          </View>
+          </Animated.View>
 
           {/* Password input */}
           {(isExistingUser !== null || signUp) && (
