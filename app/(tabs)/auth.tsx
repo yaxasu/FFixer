@@ -40,10 +40,9 @@ export default function Auth() {
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidPassword, setInvalidPassword] = useState(false);
 
+  // Function to trigger email shake animation
   const emailShakeAnim = useRef(new Animated.Value(0)).current;
   const isEmailAnimatingRef = useRef(false); // Ref to preserve state between renders
-
-  // Function to trigger email shake animation
   const triggerEmailShake = () => {
     if (!isEmailAnimatingRef.current) {
       isEmailAnimatingRef.current = true; // Use the ref instead of a regular variable
@@ -89,10 +88,9 @@ export default function Auth() {
     }
   };
 
+  // Function to trigger password shake animation
   const passwordShakeAnim = useRef(new Animated.Value(0)).current; // Animated value for password shake
   let isPasswordAnimating = false; // Prevent overlapping animations
-
-  // Function to trigger password shake animation
   const triggerPasswordShake = () => {
     if (!isPasswordAnimating) {
       isPasswordAnimating = true;
@@ -426,7 +424,7 @@ const styles = StyleSheet.create({
     fontFamily: "helvetica",
   },
   linkText: {
-    color: "#141414",
+    color: "#444",
     fontFamily: "helvetica-bold",
   },
 });

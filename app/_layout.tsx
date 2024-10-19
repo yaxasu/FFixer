@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { StatusBar } from 'react-native';
 
@@ -11,7 +11,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 // Prevent the splash screen from auto-hiding until the fonts are loaded
 SplashScreen.preventAutoHideAsync();
 
-// RootLayout component
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -44,7 +43,7 @@ export default function RootLayout() {
 
   // Render the app layout with appropriate theme
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
