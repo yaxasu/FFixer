@@ -4,6 +4,7 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { View } from "react-native";
 
 const MainLayout = () => {
   const colorScheme = useColorScheme();
@@ -14,10 +15,14 @@ const MainLayout = () => {
         headerShown: false,
         contentStyle: {
           backgroundColor: Colors[colorScheme ?? "dark"].background,
-        },
+        }
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="index" 
+        options={({navigation}) => ({
+          headerShown: false,
+        })}
+      />
       <Stack.Screen
         name="auth"
         options={({ navigation }) => ({
@@ -38,7 +43,23 @@ const MainLayout = () => {
               <Ionicons name="arrow-back" size={28} color="#141414" />
             </TouchableOpacity>
           ),
+          headerBackground: () => (
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "#fff",
+                  borderBottomWidth: 5,
+                  borderBottomColor: "#000",
+                }}
+              />
+            ),
         })}
+      />
+      <Stack.Screen
+        name="(protected)"
+        options={{
+          gestureEnabled: false,
+        }} 
       />
     </Stack>
   );

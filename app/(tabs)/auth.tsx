@@ -20,6 +20,8 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { checkEmail, registerUser, loginUser } from "../functions/api";
 import { setToken } from "../functions/storage";
+import { useRouter } from "expo-router";
+import { useNavigation } from "expo-router";
 
 // Enable LayoutAnimation on Android
 if (
@@ -39,6 +41,9 @@ export default function Auth() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidPassword, setInvalidPassword] = useState(false);
+
+  const router = useRouter();
+  const navigation = useNavigation()
 
   // Function to trigger email shake animation
   const emailShakeAnim = useRef(new Animated.Value(0)).current;
@@ -199,6 +204,13 @@ export default function Auth() {
         const result = await loginUser(emailOrPhone, password);
         console.log(result);
         setInvalidPassword(false); // Clear invalid password state on success
+
+        if (result.access_token){
+          await setToken(result.access_token);
+          // router.push('/(protected)/home')
+          navigation.navigate("(protected)" as unknown as never)
+        }
+
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 400) {

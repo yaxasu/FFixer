@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Link } from "expo-router";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -40,6 +41,13 @@ export default function HomeScreen() {
       >
         FFixer
       </Animated.Text>
+
+      {/* Remove */}
+      <Link href="/(tabs)/(protected)/home" asChild>
+        <TouchableOpacity>
+          <Text>GoHome</Text>
+        </TouchableOpacity>
+      </Link>
 
       <TouchableOpacity onPress={handleGetStartedPress} style={styles.buttonContainer}>
         <Animated.View
