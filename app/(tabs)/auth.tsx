@@ -22,6 +22,7 @@ import { checkEmail, registerUser, loginUser } from "../functions/api";
 import { setToken } from "../functions/storage";
 import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 // Enable LayoutAnimation on Android
 if (
@@ -51,6 +52,7 @@ export default function Auth() {
   const triggerEmailShake = () => {
     if (!isEmailAnimatingRef.current) {
       isEmailAnimatingRef.current = true; // Use the ref instead of a regular variable
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Animated.sequence([
         Animated.timing(emailShakeAnim, {
           toValue: 8,
@@ -99,6 +101,7 @@ export default function Auth() {
   const triggerPasswordShake = () => {
     if (!isPasswordAnimating) {
       isPasswordAnimating = true;
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // Haptic feedback
       Animated.sequence([
         Animated.timing(passwordShakeAnim, {
           toValue: 8,
