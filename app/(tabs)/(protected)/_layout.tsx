@@ -14,15 +14,25 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#000",
+        tabBarActiveTintColor: "#141414",
         headerStyle: {
           backgroundColor: "#fff",
         },
         headerShadowVisible: false,
         headerTintColor: "#000",
+        headerTitleAlign: "left",
+        headerTitleStyle: {
+          fontSize: 34,
+          fontFamily: "helvetica_bold",
+          color: "#141414",
+          paddingTop: 40,
+          height: 80
+        },
         tabBarStyle: {
           backgroundColor: "#fff",
-          height: 100,
+          height: 90,
+          borderTopColor: "#eeeeee",
+          borderTopWidth: 2,
         },
         tabBarShowLabel: false,
       }}
@@ -30,7 +40,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "FFixer",
           tabBarIcon: ({ color, focused }) => (
             <Entypo name="home" size={30} color={color} />
           ),
@@ -70,7 +80,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="messages"
         options={{
-          title: "Messages",
+          title: "Chat",
           tabBarIcon: ({ color, focused }) => (
             <Feather name="message-circle" size={30} color={color} />
           ),

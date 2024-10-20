@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import axios, { AxiosError } from "axios";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { checkEmail, registerUser, loginUser } from "../functions/api";
 import { setToken } from "../functions/storage";
@@ -44,7 +45,7 @@ export default function Auth() {
   const [invalidPassword, setInvalidPassword] = useState(false);
 
   const router = useRouter();
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   // Function to trigger email shake animation
   const emailShakeAnim = useRef(new Animated.Value(0)).current;
@@ -182,7 +183,7 @@ export default function Auth() {
   const checkEmailExists = async () => {
     if (!validateEmail(emailOrPhone)) {
       setInvalidEmail(true);
-      triggerEmailShake()
+      triggerEmailShake();
       return;
     }
     setInvalidEmail(false);
@@ -199,8 +200,10 @@ export default function Auth() {
   };
 
   const handleLoginOrSignUp = async () => {
+    setLoading(true); // Start the loading for both login and sign-up flows
+
     if (isExistingUser) {
-      setLoading(true);
+      // Log in an existing user
       console.log("Sign in with:", emailOrPhone, password);
 
       try {
@@ -208,38 +211,56 @@ export default function Auth() {
         console.log(result);
         setInvalidPassword(false); // Clear invalid password state on success
 
-        if (result.access_token){
+        if (result.access_token) {
           await setToken(result.access_token);
-          // router.push('/(protected)/home')
-          navigation.navigate("(protected)" as unknown as never)
+          navigation.navigate("(protected)" as unknown as never);
         }
-
       } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          if (error.response?.status === 400) {
-            setInvalidPassword(true); // Set invalid password state
-            triggerPasswordShake(); // Trigger shake animation for incorrect password
-          }
-        } else {
-          console.error("Unknown error occurred:", error);
-        }
+        handleLoginError(error);
       } finally {
         setLoading(false);
       }
     } else if (signUp) {
-      setLoading(true);
+      // Sign up a new user
       console.log("Sign up with:", emailOrPhone, password);
 
       try {
         const result = await registerUser(emailOrPhone, password);
         console.log(result);
-        setInvalidPassword(false); // Clear invalid password state on success
+        setInvalidPassword(false); // Clear invalid password state on successful sign-up
+
+        // Proceed to auto-login after successful registration
+        const loginResult = await loginUser(emailOrPhone, password);
+        console.log(loginResult);
+
+        if (loginResult.access_token) {
+          await setToken(loginResult.access_token);
+          navigation.navigate("(protected)" as unknown as never);
+        }
       } catch (error: unknown) {
-        console.error("Error registering user:", error);
+        handleLoginError(error);
       } finally {
         setLoading(false);
       }
     }
+  };
+
+  // Separate error handler for login and sign-up errors
+  const handleLoginError = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 400) {
+        setInvalidPassword(true); // Set invalid password state
+        triggerPasswordShake(); // Trigger shake animation for incorrect password
+      }
+    } else {
+      console.error("Unknown error occurred:", error);
+    }
+  };
+
+  const refreshPage = () => {
+    setEmailOrPhone(""); // Clear the email input
+    setIsExistingUser(null); // Reset the state
+    setSignUp(false); // Reset the sign-up state
   };
 
   return (
@@ -274,6 +295,7 @@ export default function Auth() {
             style={[
               styles.emailContainer,
               invalidEmail && { borderColor: "red", borderWidth: 2 },
+              isExistingUser !== null && { backgroundColor: "#f0f0f0" }, // Darker background when email is entered
               { transform: [{ translateX: emailShakeAnim }] },
             ]}
           >
@@ -289,12 +311,13 @@ export default function Auth() {
               selectionColor="#141414"
             />
             {isExistingUser !== null && (
-              <FontAwesome5
-                name="check-circle"
-                size={24}
-                color="green"
-                style={styles.checkmark}
-              />
+              <TouchableOpacity onPress={refreshPage}>
+                <Ionicons 
+                  name="close" 
+                  size={20} 
+                  color="#141414" 
+                  style={styles.checkmark}/>
+              </TouchableOpacity>
             )}
           </Animated.View>
 

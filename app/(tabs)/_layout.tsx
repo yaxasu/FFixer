@@ -1,25 +1,25 @@
 import React from "react";
 import { Stack } from "expo-router";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { View } from "react-native";
+import { useRouter } from 'expo-router';
+
 
 const MainLayout = () => {
-  const colorScheme = useColorScheme();
-
+  const router = useRouter()
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         contentStyle: {
-          backgroundColor: Colors[colorScheme ?? "dark"].background,
-        }
+          backgroundColor: "#fff",
+        },
       }}
     >
-      <Stack.Screen name="index" 
-        options={({navigation}) => ({
+      <Stack.Screen
+        name="index"
+        options={({ navigation }) => ({
           headerShown: false,
         })}
       />
@@ -44,22 +44,112 @@ const MainLayout = () => {
             </TouchableOpacity>
           ),
           headerBackground: () => (
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: "#fff",
-                  borderBottomWidth: 5,
-                  borderBottomColor: "#000",
-                }}
-              />
-            ),
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#fff",
+                borderBottomWidth: 5,
+                borderBottomColor: "#000",
+              }}
+            />
+          ),
         })}
       />
       <Stack.Screen
         name="(protected)"
         options={{
           gestureEnabled: false,
-        }} 
+        }}
+      />
+      <Stack.Screen
+        name="protectedPages/editProfile"
+        options={({ navigation }) => ({
+          headerShown: true,
+          gestureDirection: "vertical",
+          animation: "slide_from_bottom",
+          headerLeft: () => (
+            <TouchableOpacity
+            onPress={() => router.back()}
+              style={{ paddingLeft: 10 }}
+            >
+              <Ionicons name="close" size={28} color="#141414" />
+            </TouchableOpacity>
+          ),
+          headerBackground: () => (
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#fff",
+                borderBottomWidth: 0,
+                borderBottomColor: "#000",
+              }}
+            />
+          ),
+          title: "",
+          contentStyle: {
+            backgroundColor: "#fff",
+          },
+        })}
+      />
+      <Stack.Screen
+        name="protectedPages/payment"
+        options={{
+          headerShown: true,
+          gestureDirection: "vertical",
+          animation: "slide_from_bottom",
+          headerLeft: ({ navigation }: any) => (
+            <TouchableOpacity
+            onPress={() => router.back()}
+              style={{ paddingLeft: 10 }}
+            >
+              <Ionicons name="close" size={28} color="#141414" />
+            </TouchableOpacity>
+          ),
+          headerBackground: () => (
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#fff",
+                borderBottomWidth: 0,
+                borderBottomColor: "#000",
+              }}
+            />
+          ),
+          title: "",
+          contentStyle: {
+            backgroundColor: "#fff",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="protectedPages/settings"
+        options={{
+          headerShown: true,
+          gestureDirection: "vertical",
+          animation: "slide_from_bottom",
+          headerLeft: ({ navigation }: any) => (
+            <TouchableOpacity
+            onPress={() => router.back()}
+              style={{ paddingLeft: 10 }}
+            >
+              <Ionicons name="close" size={28} color="#141414" />
+            </TouchableOpacity>
+          ),
+          headerBackground: () => (
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#fff",
+                borderBottomWidth: 0,
+                borderBottomColor: "#000",
+              }}
+            />
+          ),
+          title: "",
+          contentStyle: {
+            backgroundColor: "#fff",
+          },
+        }}
       />
     </Stack>
   );
