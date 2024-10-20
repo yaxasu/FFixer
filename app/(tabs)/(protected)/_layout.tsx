@@ -1,15 +1,16 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import Entypo from '@expo/vector-icons/Entypo';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics'; // Import expo-haptics
-import { TouchableOpacity } from 'react-native'; // Import TouchableOpacity
+import { TouchableOpacity } from 'react-native';
 
 export default function TabsLayout() {
   // Function to handle haptic feedback on tab press
   const handleTabPress = () => {
     Haptics.selectionAsync(); // Trigger haptic feedback
   };
+  const router = useRouter()
 
   return (
     <Tabs
@@ -25,8 +26,8 @@ export default function TabsLayout() {
           fontSize: 34,
           fontFamily: "helvetica_bold",
           color: "#141414",
-          paddingTop: 40,
-          height: 80
+          marginTop: 80,
+          height: 100
         },
         tabBarStyle: {
           backgroundColor: "#fff",
@@ -44,6 +45,11 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Entypo name="home" size={30} color={color} />
           ),
+          headerRight: () => (
+            <TouchableOpacity onPress={() => router.push('/protectedPages/messages')}>
+              <Feather name="message-circle" size={26} color="#000" style={{ marginRight: 12, marginTop: 20}} />
+            </TouchableOpacity>
+          ),
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
@@ -58,9 +64,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="services"
         options={{
-          title: "Search",
+          title: "Services",
           tabBarIcon: ({ color, focused }) => (
             <Feather name="search" size={30} color={color} />
           ),
@@ -78,11 +84,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="activity"
         options={{
-          title: "Chat",
+          title: "Activity",
           tabBarIcon: ({ color, focused }) => (
-            <Feather name="message-circle" size={30} color={color} />
+            <Feather name="activity" size={30} color={color} />
           ),
           tabBarButton: (props) => (
             <TouchableOpacity

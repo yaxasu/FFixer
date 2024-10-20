@@ -3,7 +3,7 @@ import { Link, useNavigation } from "expo-router";
 import { clearToken } from "@/app/functions/storage";
 
 
-export default function Search() {
+export default function Activity() {
   return (
     <View style={styles.container}>
         <Text>Testing</Text>

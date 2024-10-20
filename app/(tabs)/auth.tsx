@@ -259,6 +259,7 @@ export default function Auth() {
 
   const refreshPage = () => {
     setEmailOrPhone(""); // Clear the email input
+    setPassword("");
     setIsExistingUser(null); // Reset the state
     setSignUp(false); // Reset the sign-up state
   };

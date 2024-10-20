@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Link, useNavigation } from "expo-router";
-import { clearToken } from "@/app/functions/storage";
-
+import { Text, View, StyleSheet } from "react-native";
+import Header from "@/components/Header";
 
 export default function Messages() {
   return (
     <View style={styles.container}>
+        <Header />
         <Text>Testing</Text>
     </View>
   );
@@ -14,7 +13,9 @@ export default function Messages() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#fff",
+  },
+  text: {
+    color: "#000",
   },
 });

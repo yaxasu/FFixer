@@ -15,16 +15,15 @@ export default function HomeScreen() {
   const buttonScale = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Animation sequence for logo and button
     Animated.sequence([
-      Animated.spring(logoScale, {
+      Animated.timing(logoScale, {
         toValue: 1,
-        friction: 3,
+        duration: 300, // Shorter duration for faster animation
         useNativeDriver: true,
       }),
-      Animated.spring(buttonScale, {
+      Animated.timing(buttonScale, {
         toValue: 1,
-        friction: 3,
+        duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
