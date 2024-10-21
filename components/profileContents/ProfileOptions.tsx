@@ -16,7 +16,7 @@ const ProfileOptions = () => {
   const router = useRouter();
 
   const options: IconOption[] = [
-    { title: 'Edit Profile', icon: 'edit', onPress: () => {router.push("/protectedPages/editProfile")} },
+    { title: 'Edit Profile', icon: 'edit', onPress: () => {router.push("/protectedPages/completeProfile")} },
     { title: 'Payment', icon: 'credit-card', onPress: () => {router.push("/protectedPages/payment")} },
     { title: 'Settings', icon: 'settings', onPress: () => {router.push("/protectedPages/settings")} },
   ];

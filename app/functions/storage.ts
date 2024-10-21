@@ -13,3 +13,17 @@ export const getToken = () => {
 export const clearToken = () => {
   storage.delete('token');
 };
+
+
+export const setProfileData = (profileData: object) => {
+  storage.set('profile', JSON.stringify(profileData));
+};
+
+export const getProfileData = () => {
+  const profileString = storage.getString('profile');
+  return profileString ? JSON.parse(profileString) : null;
+};
+
+export const clearProfileData = () => {
+  storage.delete('profile');
+};

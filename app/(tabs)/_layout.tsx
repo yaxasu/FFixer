@@ -148,6 +148,14 @@ const MainLayout = () => {
         }}
       />
       <Stack.Screen
+        name="protectedPages/completeProfile"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
         name="protectedPages/messages"
         options={{
           headerShown: false,

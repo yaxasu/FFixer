@@ -16,11 +16,15 @@ import {
   Animated,
 } from "react-native";
 import axios, { AxiosError } from "axios";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { checkEmail, registerUser, loginUser } from "../functions/api";
-import { setToken } from "../functions/storage";
+import {
+  checkEmail,
+  registerUser,
+  loginUser,
+  getUserInfo,
+} from "../functions/api";
+import { setToken, getToken, setProfileData } from "../functions/storage";
 import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -200,12 +204,22 @@ export default function Auth() {
   };
 
   const handleLoginOrSignUp = async () => {
-    setLoading(true); // Start the loading for both login and sign-up flows
+    setLoading(true); // Start loading indicator
 
-    if (isExistingUser) {
-      // Log in an existing user
-      console.log("Sign in with:", emailOrPhone, password);
+    const handleProfileDataFetch = async (token: string) => {
+      try {
+        const profileData = await getUserInfo(token);
+        console.log("Profile Data:", profileData);
+        if (profileData) {
+          setProfileData(profileData);
+        }
+        navigation.navigate("(protected)" as unknown as never);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
 
+    const handleLogin = async () => {
       try {
         const result = await loginUser(emailOrPhone, password);
         console.log(result);
@@ -213,35 +227,36 @@ export default function Auth() {
 
         if (result.access_token) {
           await setToken(result.access_token);
-          navigation.navigate("(protected)" as unknown as never);
+          await handleProfileDataFetch(result.access_token);
         }
       } catch (error: unknown) {
         handleLoginError(error);
-      } finally {
-        setLoading(false);
       }
-    } else if (signUp) {
-      // Sign up a new user
-      console.log("Sign up with:", emailOrPhone, password);
+    };
 
+    const handleSignUp = async () => {
       try {
         const result = await registerUser(emailOrPhone, password);
         console.log(result);
         setInvalidPassword(false); // Clear invalid password state on successful sign-up
 
-        // Proceed to auto-login after successful registration
-        const loginResult = await loginUser(emailOrPhone, password);
-        console.log(loginResult);
-
-        if (loginResult.access_token) {
-          await setToken(loginResult.access_token);
-          navigation.navigate("(protected)" as unknown as never);
-        }
+        // Auto-login after successful registration
+        await handleLogin();
       } catch (error: unknown) {
         handleLoginError(error);
-      } finally {
-        setLoading(false);
       }
+    };
+
+    try {
+      if (isExistingUser) {
+        console.log("Sign in with:", emailOrPhone, password);
+        await handleLogin();
+      } else if (signUp) {
+        console.log("Sign up with:", emailOrPhone);
+        await handleSignUp();
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -313,11 +328,12 @@ export default function Auth() {
             />
             {isExistingUser !== null && (
               <TouchableOpacity onPress={refreshPage}>
-                <Ionicons 
-                  name="close" 
-                  size={20} 
-                  color="#141414" 
-                  style={styles.checkmark}/>
+                <Ionicons
+                  name="close"
+                  size={20}
+                  color="#141414"
+                  style={styles.checkmark}
+                />
               </TouchableOpacity>
             )}
           </Animated.View>

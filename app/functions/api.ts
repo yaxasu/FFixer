@@ -10,6 +10,17 @@ interface LoginResponse {
   token_type?: string;
   detail?: string;
 }
+interface UserInfo {
+  email: string;
+  phone_number: String;
+  first_name: string;
+  last_name: string;
+  date_of_birth: Date;
+  citizenship: String;
+  latitude: Number;
+  longitude: Number;
+  verification_status: String;
+}
 
 export const checkEmail = async (email: string): Promise<boolean> => {
     try {
@@ -52,3 +63,17 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     throw error;
   }
 };
+
+export const getUserInfo = async(token: string) => {
+  try {
+    const response: AxiosResponse<UserInfo> = await axios.get(`${API_BASE_URL}/user`, {
+      headers: {
+        Authorization: `Bearer ${token}` // Include JWT token in the request
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    throw error;
+  }
+}
