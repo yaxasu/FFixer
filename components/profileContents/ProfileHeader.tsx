@@ -1,9 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { getProfileData } from '@/app/functions/storage';
 
 const ProfileHeader = () => {
-  const userName = 'Name'; // Placeholder
-  const userEmail = 'email@example.com'; // Placeholder
+  const profile = getProfileData()
+
+  const userName = `${profile.first_name} ${profile.last_name[0]}.`
+  const userRole = 
+    profile.user_role === "admin" ? "Staff" :
+    profile.user_role === "worker" ? "FFixer" :
+    "Core Member";
 
   return (
     <View style={styles.headerContainer}>
@@ -13,7 +19,7 @@ const ProfileHeader = () => {
       />
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.userEmail}>{userEmail}</Text>
+        <Text style={styles.userEmail}>{userRole}</Text>
       </View>
     </View>
   );

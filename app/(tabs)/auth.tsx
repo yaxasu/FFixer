@@ -15,7 +15,7 @@ import {
   UIManager,
   Animated,
 } from "react-native";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
@@ -24,9 +24,8 @@ import {
   loginUser,
   getUserInfo,
 } from "../functions/api";
-import { setToken, getToken, setProfileData } from "../functions/storage";
+import { setToken, setProfileData, getProfileData } from "../functions/storage";
 import { useRouter } from "expo-router";
-import { useNavigation } from "expo-router";
 import * as Haptics from "expo-haptics";
 
 // Enable LayoutAnimation on Android
@@ -49,14 +48,51 @@ export default function Auth() {
   const [invalidPassword, setInvalidPassword] = useState(false);
 
   const router = useRouter();
-  const navigation = useNavigation();
 
-  // Function to trigger email shake animation
+  // Animated values for shake animations
   const emailShakeAnim = useRef(new Animated.Value(0)).current;
-  const isEmailAnimatingRef = useRef(false); // Ref to preserve state between renders
+  const isEmailAnimatingRef = useRef(false);
+  const passwordShakeAnim = useRef(new Animated.Value(0)).current;
+  const isPasswordAnimatingRef = useRef(false);
+
+  useEffect(() => {
+    const handleKeyboardShow = () => {
+      if (!keyboardVisible) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setKeyboardVisible(true);
+      }
+    };
+
+    const handleKeyboardHide = () => {
+      if (keyboardVisible) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setKeyboardVisible(false);
+      }
+    };
+
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      handleKeyboardShow
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      handleKeyboardHide
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [keyboardVisible]);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const triggerEmailShake = () => {
     if (!isEmailAnimatingRef.current) {
-      isEmailAnimatingRef.current = true; // Use the ref instead of a regular variable
+      isEmailAnimatingRef.current = true;
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Animated.sequence([
         Animated.timing(emailShakeAnim, {
@@ -95,18 +131,15 @@ export default function Auth() {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        isEmailAnimatingRef.current = false; // Reset flag after animation completes
+        isEmailAnimatingRef.current = false;
       });
     }
   };
 
-  // Function to trigger password shake animation
-  const passwordShakeAnim = useRef(new Animated.Value(0)).current; // Animated value for password shake
-  let isPasswordAnimating = false; // Prevent overlapping animations
   const triggerPasswordShake = () => {
-    if (!isPasswordAnimating) {
-      isPasswordAnimating = true;
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // Haptic feedback
+    if (!isPasswordAnimatingRef.current) {
+      isPasswordAnimatingRef.current = true;
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Animated.sequence([
         Animated.timing(passwordShakeAnim, {
           toValue: 8,
@@ -144,44 +177,9 @@ export default function Auth() {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        isPasswordAnimating = false; // Reset flag when animation is complete
+        isPasswordAnimatingRef.current = false;
       });
     }
-  };
-
-  useEffect(() => {
-    const handleKeyboardShow = () => {
-      if (!keyboardVisible) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Trigger layout animation
-        setKeyboardVisible(true);
-      }
-    };
-
-    const handleKeyboardHide = () => {
-      if (keyboardVisible) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Trigger layout animation
-        setKeyboardVisible(false);
-      }
-    };
-
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      handleKeyboardShow
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      handleKeyboardHide
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, [keyboardVisible]);
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   };
 
   const checkEmailExists = async () => {
@@ -204,16 +202,14 @@ export default function Auth() {
   };
 
   const handleLoginOrSignUp = async () => {
-    setLoading(true); // Start loading indicator
+    setLoading(true);
 
     const handleProfileDataFetch = async (token: string) => {
       try {
         const profileData = await getUserInfo(token);
-        console.log("Profile Data:", profileData);
         if (profileData) {
           setProfileData(profileData);
         }
-        navigation.navigate("(protected)" as unknown as never);
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
@@ -222,12 +218,17 @@ export default function Auth() {
     const handleLogin = async () => {
       try {
         const result = await loginUser(emailOrPhone, password);
-        console.log(result);
-        setInvalidPassword(false); // Clear invalid password state on success
+        setInvalidPassword(false);
 
         if (result.access_token) {
           await setToken(result.access_token);
           await handleProfileDataFetch(result.access_token);
+          const profile = getProfileData();
+          if (profile.first_name == "None") {
+            router.push("/(tabs)/protectedPages/completeProfile");
+          } else {
+            router.push("/home");
+          }
         }
       } catch (error: unknown) {
         handleLoginError(error);
@@ -237,10 +238,7 @@ export default function Auth() {
     const handleSignUp = async () => {
       try {
         const result = await registerUser(emailOrPhone, password);
-        console.log(result);
-        setInvalidPassword(false); // Clear invalid password state on successful sign-up
-
-        // Auto-login after successful registration
+        setInvalidPassword(false);
         await handleLogin();
       } catch (error: unknown) {
         handleLoginError(error);
@@ -249,10 +247,8 @@ export default function Auth() {
 
     try {
       if (isExistingUser) {
-        console.log("Sign in with:", emailOrPhone, password);
         await handleLogin();
       } else if (signUp) {
-        console.log("Sign up with:", emailOrPhone);
         await handleSignUp();
       }
     } finally {
@@ -260,12 +256,11 @@ export default function Auth() {
     }
   };
 
-  // Separate error handler for login and sign-up errors
   const handleLoginError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 400) {
-        setInvalidPassword(true); // Set invalid password state
-        triggerPasswordShake(); // Trigger shake animation for incorrect password
+        setInvalidPassword(true);
+        triggerPasswordShake();
       }
     } else {
       console.error("Unknown error occurred:", error);
@@ -273,10 +268,10 @@ export default function Auth() {
   };
 
   const refreshPage = () => {
-    setEmailOrPhone(""); // Clear the email input
+    setEmailOrPhone("");
     setPassword("");
-    setIsExistingUser(null); // Reset the state
-    setSignUp(false); // Reset the sign-up state
+    setIsExistingUser(null);
+    setSignUp(false);
   };
 
   return (
@@ -306,12 +301,12 @@ export default function Auth() {
             <FontAwesome name="sign-in" size={75} color="#141414" />
           </View>
 
-          {/* Input for email */}
+          {/* Email Input with Spinner */}
           <Animated.View
             style={[
               styles.emailContainer,
               invalidEmail && { borderColor: "red", borderWidth: 2 },
-              isExistingUser !== null && { backgroundColor: "#f0f0f0" }, // Darker background when email is entered
+              isExistingUser !== null && { backgroundColor: "#f0f0f0" },
               { transform: [{ translateX: emailShakeAnim }] },
             ]}
           >
@@ -323,10 +318,12 @@ export default function Auth() {
               keyboardType="email-address"
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
-              editable={isExistingUser === null}
+              editable={isExistingUser === null && !loading}
               selectionColor="#141414"
             />
-            {isExistingUser !== null && (
+            {loading && isExistingUser === null ? (
+              <ActivityIndicator size="small" color="#000" />
+            ) : isExistingUser !== null ? (
               <TouchableOpacity onPress={refreshPage}>
                 <Ionicons
                   name="close"
@@ -335,16 +332,16 @@ export default function Auth() {
                   style={styles.checkmark}
                 />
               </TouchableOpacity>
-            )}
+            ) : null}
           </Animated.View>
 
-          {/* Password input */}
+          {/* Password Input */}
           {(isExistingUser !== null || signUp) && (
             <Animated.View
               style={[
                 styles.passwordContainer,
                 invalidPassword && { borderColor: "red", borderWidth: 2 },
-                { transform: [{ translateX: passwordShakeAnim }] }, // Apply password shaking effect
+                { transform: [{ translateX: passwordShakeAnim }] },
               ]}
             >
               <TextInput
@@ -355,6 +352,7 @@ export default function Auth() {
                 secureTextEntry={!showPassword}
                 placeholderTextColor="#A9A9A9"
                 selectionColor="#141414"
+                editable={!loading}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -367,22 +365,29 @@ export default function Auth() {
             </Animated.View>
           )}
 
-          {loading && <ActivityIndicator size="large" color="#000" />}
-
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={
-              isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
-            }
-          >
-            <Text style={styles.loginButtonText}>
-              {isExistingUser === null
-                ? "Next"
-                : isExistingUser
-                ? "Sign In"
-                : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
+          {/* Remove duplicate spinner */}
+          {/* Animated Button with Spinner */}
+          <Animated.View>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={
+                isExistingUser === null ? checkEmailExists : handleLoginOrSignUp
+              }
+              disabled={loading}
+            >
+              {loading && isExistingUser !== null ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.loginButtonText}>
+                  {isExistingUser === null
+                    ? "Next"
+                    : isExistingUser
+                    ? "Sign In"
+                    : "Sign Up"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
 
           <View style={styles.footerTextContainer}>
             <Text style={styles.footerText}>
@@ -461,6 +466,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 8,
+    marginBottom: 15,
   },
   loginButtonText: {
     color: "#fff",

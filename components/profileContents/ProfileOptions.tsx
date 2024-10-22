@@ -12,11 +12,10 @@ type IconOption = {
 
 const ProfileOptions = () => {
   const [pressedIndex, setPressedIndex] = useState<number | null>(null);
-  const navigation = useNavigation();
   const router = useRouter();
 
   const options: IconOption[] = [
-    { title: 'Edit Profile', icon: 'edit', onPress: () => {router.push("/protectedPages/completeProfile")} },
+    { title: 'Edit Information', icon: 'edit', onPress: () => {router.push("/protectedPages/editProfile")} },
     { title: 'Payment', icon: 'credit-card', onPress: () => {router.push("/protectedPages/payment")} },
     { title: 'Settings', icon: 'settings', onPress: () => {router.push("/protectedPages/settings")} },
   ];

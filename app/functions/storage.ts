@@ -14,7 +14,6 @@ export const clearToken = () => {
   storage.delete('token');
 };
 
-
 export const setProfileData = (profileData: object) => {
   storage.set('profile', JSON.stringify(profileData));
 };
