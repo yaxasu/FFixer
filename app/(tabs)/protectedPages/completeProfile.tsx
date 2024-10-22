@@ -15,13 +15,13 @@ import {
 import * as Location from 'expo-location';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { getToken } from '@/app/functions/storage';
-import { completeProfile } from '@/app/functions/api';
+import { getToken } from '@/app/api/storage';
+import { completeProfile } from '@/app/api/user';
 import InputField from '@/components/InputField';
-import { getUserInfo } from '@/app/functions/api';
-import { setProfileData } from '@/app/functions/storage';
+import { getUserInfo } from '@/app/api/user';
+import { setProfileData } from '@/app/api/storage';
 import { useNavigation } from '@react-navigation/native';
-import { clearProfileData, clearToken } from '@/app/functions/storage';
+import { clearProfileData, clearToken } from '@/app/api/storage';
 
 interface FormData {
   phoneNumber: string;

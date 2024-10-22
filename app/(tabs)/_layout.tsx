@@ -156,7 +156,7 @@ const MainLayout = () => {
         }}
       />
       <Stack.Screen
-        name="protectedPages/messages"
+        name="protectedPages/allMessageScreen"
         options={{
           headerShown: false,
         }}

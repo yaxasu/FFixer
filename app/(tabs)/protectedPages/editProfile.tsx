@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { getProfileData } from '@/app/functions/storage';
+import { getProfileData } from '@/app/api/storage';
 
 const EditInformationScreen = () => {
   const data = getProfileData()

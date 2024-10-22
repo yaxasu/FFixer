@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { clearToken, clearProfileData } from '@/app/functions/storage'; // adjust path as needed
+import { clearToken, clearProfileData } from '@/app/api/storage'; // adjust path as needed
 
 const ProfileActionButton = () => {
   const navigation = useNavigation();

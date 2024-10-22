@@ -42,11 +42,11 @@ export default function HomeScreen() {
       </Animated.Text>
 
       {/* Remove */}
-      {/* <Link href="/(tabs)/(protected)/home" asChild>
+      <Link href="/(tabs)/(protected)/home" asChild>
         <TouchableOpacity>
           <Text>GoHome</Text>
         </TouchableOpacity>
-      </Link> */}
+      </Link>
 
       <TouchableOpacity onPress={handleGetStartedPress} style={styles.buttonContainer}>
         <Animated.View

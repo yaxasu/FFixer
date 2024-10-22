@@ -11,7 +11,7 @@ import {
   NativeSyntheticEvent,
   TextInputChangeEventData,
 } from 'react-native';
-import { getToken, getProfileData } from '@/app/functions/storage';
+import { getToken, getProfileData } from '@/app/api/storage';
 
 interface Message {
   sender_id: number;

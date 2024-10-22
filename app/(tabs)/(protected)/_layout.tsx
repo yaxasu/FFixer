@@ -46,7 +46,7 @@ export default function TabsLayout() {
             <Entypo name="home" size={30} color={color} />
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => router.push('/protectedPages/messages')}>
+            <TouchableOpacity onPress={() => router.push('/protectedPages/allMessageScreen')}>
               <Feather name="message-circle" size={26} color="#000" style={{ marginRight: 12, marginTop: 20}} />
             </TouchableOpacity>
           ),

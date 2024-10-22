@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Link, useNavigation } from "expo-router";
-import { clearToken } from "@/app/functions/storage";
+import { clearToken } from "@/app/api/storage";
 
 
 export default function Services() {

@@ -23,8 +23,8 @@ import {
   registerUser,
   loginUser,
   getUserInfo,
-} from "../functions/api";
-import { setToken, setProfileData, getProfileData } from "../functions/storage";
+} from "../api/user";
+import { setToken, setProfileData, getProfileData } from "../api/storage";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 
