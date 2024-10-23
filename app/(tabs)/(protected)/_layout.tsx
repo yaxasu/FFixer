@@ -7,10 +7,12 @@ import { TouchableOpacity } from 'react-native';
 
 export default function TabsLayout() {
   // Function to handle haptic feedback on tab press
-  const handleTabPress = () => {
+  const handleTabPress = (onPress:any) => (e:any) => {
     Haptics.selectionAsync(); // Trigger haptic feedback
+    if (onPress) onPress(e); // Call the default onPress behavior if exists
   };
-  const router = useRouter()
+
+  const router = useRouter();
 
   return (
     <Tabs
@@ -26,14 +28,14 @@ export default function TabsLayout() {
           fontSize: 34,
           fontFamily: "helvetica_bold",
           color: "#141414",
-          marginTop: 80,
-          height: 100
+          paddingTop: 30,
+          height: 100,
         },
         tabBarStyle: {
           backgroundColor: "#fff",
-          height: 90,
+          height: 80,
           borderTopColor: "#eeeeee",
-          borderTopWidth: 2,
+          borderTopWidth: 1.5,
         },
         tabBarShowLabel: false,
       }}
@@ -42,21 +44,21 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: "FFixer",
-          tabBarIcon: ({ color, focused }) => (
-            <Entypo name="home" size={30} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Entypo name="home" size={28} color={color} />
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => router.push('/protectedPages/allMessageScreen')}>
-              <Feather name="message-circle" size={26} color="#000" style={{ marginRight: 12, marginTop: 20}} />
+            <TouchableOpacity
+              onPress={() => router.push('/protectedPages/allMessageScreen')}
+              style={{ marginRight: 15 }}
+            >
+              <Feather name="message-circle" size={26} color="#000" />
             </TouchableOpacity>
           ),
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
-              onPress={(e) => {
-                handleTabPress(); // Trigger haptic feedback
-                if (props.onPress) props.onPress(e); // Call the default onPress behavior
-              }}
+              onPress={handleTabPress(props.onPress)}
             >
               {props.children}
             </TouchableOpacity>
@@ -67,16 +69,13 @@ export default function TabsLayout() {
         name="services"
         options={{
           title: "Services",
-          tabBarIcon: ({ color, focused }) => (
-            <Feather name="search" size={30} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="search" size={28} color={color} />
           ),
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
-              onPress={(e) => {
-                handleTabPress(); // Trigger haptic feedback
-                if (props.onPress) props.onPress(e); // Call the default onPress behavior
-              }}
+              onPress={handleTabPress(props.onPress)}
             >
               {props.children}
             </TouchableOpacity>
@@ -87,16 +86,13 @@ export default function TabsLayout() {
         name="activity"
         options={{
           title: "Activity",
-          tabBarIcon: ({ color, focused }) => (
-            <Feather name="activity" size={30} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Feather name="activity" size={28} color={color} />
           ),
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
-              onPress={(e) => {
-                handleTabPress(); // Trigger haptic feedback
-                if (props.onPress) props.onPress(e); // Call the default onPress behavior
-              }}
+              onPress={handleTabPress(props.onPress)}
             >
               {props.children}
             </TouchableOpacity>
@@ -107,16 +103,13 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons name="account" size={36} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="account" size={34} color={color} />
           ),
           tabBarButton: (props) => (
             <TouchableOpacity
               {...props}
-              onPress={(e) => {
-                handleTabPress(); // Trigger haptic feedback
-                if (props.onPress) props.onPress(e); // Call the default onPress behavior
-              }}
+              onPress={handleTabPress(props.onPress)}
             >
               {props.children}
             </TouchableOpacity>

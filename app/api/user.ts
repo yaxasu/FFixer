@@ -41,6 +41,21 @@ interface ProfileData {
   longitude?: number;
 }
 
+interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+}
+
+interface UpdateProfileData {
+  email?: string;
+  phone_number?: string;
+  password?: string;
+  first_name?: string;
+  last_name?: string;
+  citizenship?: string;
+  profile_picture_url?: string
+}
+
 export const checkEmail = async (email: string): Promise<boolean> => {
   try {
     const response = await axios.get<boolean>(`${API_BASE_URL}/check_user`, {
@@ -138,3 +153,58 @@ export const completeProfile = async (
     throw error;
   }
 };
+
+
+export const updateProfile = async (
+  token: string,
+  profileData: UpdateProfileData
+): Promise<UpdateProfileResponse> => {
+  try {
+    const response: AxiosResponse<UpdateProfileResponse> = await axios.post(
+      `${API_BASE_URL}/update_profile`,
+      {
+        email: profileData.email,
+        phone_number: profileData.phone_number?.replace(/\D/g, ''), // Remove formatting if phone number provided
+        password: profileData.password,
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        citizenship: profileData.citizenship,
+        profile_picture_url: profileData.profile_picture_url
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+/*
+
+import { updateProfile } from './api';
+
+const updateUserProfile = async () => {
+  const token = 'your-auth-token-here'; // Retrieve from context/storage
+  const profileData = {
+    email: 'newemail@example.com',
+    phoneNumber: '123-456-7890',
+    password: 'newsecurepassword',
+    firstName: 'NewFirstName',
+    lastName: 'NewLastName',
+    citizenship: 'CountryName',
+  };
+
+  try {
+    const response = await updateProfile(token, profileData);
+    console.log('Profile updated successfully:', response);
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+  }
+};
+
+*/

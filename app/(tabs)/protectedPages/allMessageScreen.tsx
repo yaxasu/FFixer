@@ -43,7 +43,6 @@ const placeholderData: Message[] = [
     lastMessage: "Got it, thanks!",
     time: "1d",
   },
-  // Add more placeholder messages as needed
 ];
 
 const MessagesScreen: React.FC = () => {
@@ -68,13 +67,9 @@ const MessagesScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.headerButton}
-        >
-          <Ionicons name="chevron-back" size={28} color="#141414" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+          <Ionicons name="chevron-back" size={26} color="#141414" />
         </TouchableOpacity>
-        {/* <Text style={styles.headerTitle}>Messages</Text> */}
         <TouchableOpacity style={styles.headerButton}>
           <Ionicons name="create-outline" size={24} color="#000" />
         </TouchableOpacity>
@@ -108,7 +103,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 40,
+    paddingTop: STATUS_BAR_HEIGHT,
   },
   header: {
     height: 60,
@@ -116,14 +111,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 20,
   },
   headerButton: {
     padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#000",
   },
   searchContainer: {
     flexDirection: "row",
@@ -134,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 45,
-    marginBottom: 10
+    marginBottom: 10,
   },
   searchInput: {
     marginLeft: 10,
@@ -150,14 +141,14 @@ const styles = StyleSheet.create({
   messageItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 15, // Increased padding for a cleaner look
     borderBottomColor: "#eee",
     borderBottomWidth: 1,
   },
   avatar: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
+    width: 50, // Reduced avatar size for a more proportional look
+    height: 50,
+    borderRadius: 25,
     marginRight: 15,
     backgroundColor: "#ccc",
   },
@@ -168,11 +159,11 @@ const styles = StyleSheet.create({
   messageHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 6, // Adjusted spacing for a cleaner separation
   },
   name: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500", // Reduced font weight for a more refined look
     color: "#000",
     maxWidth: "70%",
   },
@@ -183,6 +174,7 @@ const styles = StyleSheet.create({
   lastMessage: {
     fontSize: 14,
     color: "#555",
+    marginTop: 2, // Reduced margin for a tighter look
   },
 });
 

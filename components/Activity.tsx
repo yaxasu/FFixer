@@ -7,7 +7,45 @@ import {
   Image,
 } from "react-native";
 import { Activity, ActivityType } from "@/constants/types";
-import { activities } from "@/components/Activity";
+
+// Sample data for activities
+export const activities: Activity[] = [
+  {
+    id: 1,
+    type: ActivityType.JOB_POSTED,
+    title: "Job Posted: Fix Kitchen Sink",
+    description: "You have successfully posted a new job to fix the kitchen sink.",
+    timestamp: "2024-04-22T10:30:00Z",
+  },
+  {
+    id: 2,
+    type: ActivityType.JOB_APPLIED,
+    title: "Job Applied: Install Ceiling Fan",
+    description: "John Doe has applied to your job for installing a ceiling fan.",
+    timestamp: "2024-04-21T14:15:00Z",
+  },
+  {
+    id: 3,
+    type: ActivityType.RATING_RECEIVED,
+    title: "New Rating Received",
+    description: "Jane Smith rated you 4.5 stars for your excellent work.",
+    timestamp: "2024-04-20T09:00:00Z",
+  },
+  {
+    id: 4,
+    type: ActivityType.NEW_MESSAGE,
+    title: "New Message from Alex",
+    description: "Alex sent you a new message regarding the cleaning job.",
+    timestamp: "2024-04-19T16:45:00Z",
+  },
+  {
+    id: 5,
+    type: ActivityType.RATING_GIVEN,
+    title: "Rating Given to Mark",
+    description: "You rated Mark 5 stars for his prompt service.",
+    timestamp: "2024-04-18T11:20:00Z",
+  },
+];
 
 // Define an icon mapping based on activity type
 const activityIcons: { [key in ActivityType]: string } = {
@@ -64,14 +102,19 @@ const styles = StyleSheet.create({
   },
   activityCard: {
     flexDirection: "row",
-    backgroundColor: "#f0f0f0", // Lighter background for cards
+    backgroundColor: "#f7f7f7", // Lighter background for cards
     borderRadius: 10,
     padding: 14,
     marginBottom: 12,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, // Softer shadow for a minimal look
+    shadowRadius: 2,
+    elevation: 1,
   },
   activityIcon: {
-    width: 36, // Slightly smaller for balance
+    width: 36,
     height: 36,
     marginRight: 12,
     tintColor: "#4caf50",
@@ -81,7 +124,7 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 15,
-    fontWeight: "500", // Slightly reduced weight for a cleaner look
+    fontWeight: "500", // Slightly less bold for minimalism
     color: "#333",
   },
   activityDescription: {

@@ -14,7 +14,7 @@ const ProfileHeader = () => {
   return (
     <View style={styles.headerContainer}>
       <Image 
-        source={{ uri: 'https://via.placeholder.com/100' }} // Placeholder image
+        source={{ uri: profile.profile_picture_url ? profile.profile_picture_url: 'https://i.pravatar.cc/150?img=50' }}
         style={styles.profileImage}
       />
       <View style={styles.userInfo}>

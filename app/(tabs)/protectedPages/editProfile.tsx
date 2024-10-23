@@ -3,19 +3,19 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { getProfileData } from '@/app/api/storage';
 
 const EditInformationScreen = () => {
-  const data = getProfileData()
+  const data = getProfileData();
   const infoItems = [
     { title: 'Email', value: data.email },
-    { title: 'Phone Number', value:`(${data.phone_number.slice(0, 3)}) ${data.phone_number.slice(3, 6)}-${data.phone_number.slice(6, 10)}` },
+    { title: 'Phone Number', value: `(${data.phone_number.slice(0, 3)}) ${data.phone_number.slice(3, 6)}-${data.phone_number.slice(6, 10)}` },
     { title: 'Password', value: '********' },
-    { title: 'Name', value: `${data.first_name} ${data.last_name}`},
+    { title: 'First Name', value: data.first_name },
+    { title: 'Last Name', value: data.last_name },
     { title: 'Country', value: data.citizenship },
-    // Add more items as needed
   ];
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         {infoItems.map((item, index) => (
           <TouchableOpacity
             key={index}
@@ -36,27 +36,33 @@ const EditInformationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // White background
+    backgroundColor: '#fff',
+  },
+  scrollViewContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 30,
   },
   itemContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0', // Light gray border for separation
+    paddingVertical: 18,
+    marginBottom: 16,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10
   },
   textContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingLeft: 15,
   },
   title: {
-    fontSize: 16,
-    color: '#000000', // Black text for high contrast
+    fontSize: 14,
+    color: '#888',
     fontWeight: '500',
+    marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#757575', // Dark gray for secondary information
+    color: '#333',
+    fontWeight: '600',
   },
 });
 
